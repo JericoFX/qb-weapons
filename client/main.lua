@@ -265,10 +265,10 @@ local lastammo = nil
 AddEventHandler("CEventGunShot",function(a1,a2,_)
     local player = PlayerPedId()
     local ped = a2
-    if player == ped then --have to do this because the event is fired by the amount of people who saw the player shoot, so if 100 npc hear you shoot, this will trigger 100 times
+    if player == ped then 
         local weapon = GetSelectedPedWeapon(ped)
         local ammo = GetAmmoInPedWeapon(ped, weapon)
-        if lastammo ~= ammo then
+        if lastammo ~= ammo then --have to do this because the event is fired by the amount of people who saw the player shoot, so if 100 npc hear you shoot, this will trigger 100 times
             TriggerServerEvent("weapons:server:UpdateWeaponAmmo", CurrentWeaponData, tonumber(ammo))
             if MultiplierAmount > 0 then
                 TriggerServerEvent("weapons:server:UpdateWeaponQuality", CurrentWeaponData, MultiplierAmount)
