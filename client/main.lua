@@ -134,28 +134,28 @@ CreateThread(function()
     SetWeaponsNoAutoswap(true)
 end)
 
-local ammoThread = 500
-CreateThread(function()
-    while true do
-        local ped = PlayerPedId()
-        local isArmed = IsPedArmed(ped, 7)
-        if isArmed then
-            ammoThread = 5
-            if (IsControlJustReleased(0, 24) or IsDisabledControlJustReleased(0, 24)) then
-                local weapon = GetSelectedPedWeapon(ped)
-                local ammo = GetAmmoInPedWeapon(ped, weapon)
-                TriggerServerEvent("weapons:server:UpdateWeaponAmmo", CurrentWeaponData, tonumber(ammo))
-                if MultiplierAmount > 0 then
-                    TriggerServerEvent("weapons:server:UpdateWeaponQuality", CurrentWeaponData, MultiplierAmount)
-                    MultiplierAmount = 0
-                end
-            end
-        else
-            ammoThread = 500
-        end
-        Wait(ammoThread)
-    end
-end)
+-- local ammoThread = 500
+-- CreateThread(function()
+--     while true do
+--         local ped = PlayerPedId()
+--         local isArmed = IsPedArmed(ped, 7)
+--         if isArmed then
+--             ammoThread = 5
+--             if (IsControlJustReleased(0, 24) or IsDisabledControlJustReleased(0, 24)) then
+--                 local weapon = GetSelectedPedWeapon(ped)
+--                 local ammo = GetAmmoInPedWeapon(ped, weapon)
+--                 TriggerServerEvent("weapons:server:UpdateWeaponAmmo", CurrentWeaponData, tonumber(ammo))
+--                 if MultiplierAmount > 0 then
+--                     TriggerServerEvent("weapons:server:UpdateWeaponQuality", CurrentWeaponData, MultiplierAmount)
+--                     MultiplierAmount = 0
+--                 end
+--             end
+--         else
+--             ammoThread = 500
+--         end
+--         Wait(ammoThread)
+--     end
+-- end)
 
 local shootingThread = 500
 CreateThread(function()
@@ -254,5 +254,27 @@ CreateThread(function()
             end
         end
         Wait(0)
+    end
+end)
+
+local lastammo = nil
+--Event that trigger every time the player shoot
+--@a1 | table - The amount of NPC that saw the player shooting, sometime the Player is in this table too
+--@a2 | number - The player who shoot (PlayerPedId)
+--@_  | table - Always empty?
+AddEventHandler("CEventGunShot",function(a1,a2,_)
+    local player = PlayerPedId()
+    local ped = a2
+    if player == ped then --have to do this because the event is fired by the amount of people who saw the player shoot, so if 100 npc hear you shoot, this will trigger 100 times
+        local weapon = GetSelectedPedWeapon(ped)
+        local ammo = GetAmmoInPedWeapon(ped, weapon)
+        if lastammo ~= ammo then
+            TriggerServerEvent("weapons:server:UpdateWeaponAmmo", CurrentWeaponData, tonumber(ammo))
+            if MultiplierAmount > 0 then
+                TriggerServerEvent("weapons:server:UpdateWeaponQuality", CurrentWeaponData, MultiplierAmount)
+                MultiplierAmount = 0
+            end
+            lastammo = ammo
+        end
     end
 end)
