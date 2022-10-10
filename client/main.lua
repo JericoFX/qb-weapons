@@ -134,29 +134,6 @@ CreateThread(function()
     SetWeaponsNoAutoswap(true)
 end)
 
--- local ammoThread = 500
--- CreateThread(function()
---     while true do
---         local ped = PlayerPedId()
---         local isArmed = IsPedArmed(ped, 7)
---         if isArmed then
---             ammoThread = 5
---             if (IsControlJustReleased(0, 24) or IsDisabledControlJustReleased(0, 24)) then
---                 local weapon = GetSelectedPedWeapon(ped)
---                 local ammo = GetAmmoInPedWeapon(ped, weapon)
---                 TriggerServerEvent("weapons:server:UpdateWeaponAmmo", CurrentWeaponData, tonumber(ammo))
---                 if MultiplierAmount > 0 then
---                     TriggerServerEvent("weapons:server:UpdateWeaponQuality", CurrentWeaponData, MultiplierAmount)
---                     MultiplierAmount = 0
---                 end
---             end
---         else
---             ammoThread = 500
---         end
---         Wait(ammoThread)
---     end
--- end)
-
 local shootingThread = 500
 CreateThread(function()
     while true do
