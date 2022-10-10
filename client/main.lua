@@ -257,24 +257,20 @@ CreateThread(function()
     end
 end)
 
-local lastammo = nil
---Event that trigger every time the player shoot
---@a1 | table - The amount of NPC that saw the player shooting, sometime the Player is in this table too
---@a2 | number - The player who shoot (PlayerPedId)
---@_  | table - Always empty?
-AddEventHandler("CEventGunShot",function(a1,a2,_)
-    local player = PlayerPedId()
-    local ped = a2
-    if player == ped then 
-        local weapon = GetSelectedPedWeapon(ped)
-        local ammo = GetAmmoInPedWeapon(ped, weapon)
-        if lastammo ~= ammo then --have to do this because the event is fired by the amount of people who saw the player shoot, so if 100 npc hear you shoot, this will trigger 100 times
-            TriggerServerEvent("weapons:server:UpdateWeaponAmmo", CurrentWeaponData, tonumber(ammo))
-            if MultiplierAmount > 0 then
-                TriggerServerEvent("weapons:server:UpdateWeaponQuality", CurrentWeaponData, MultiplierAmount)
-                MultiplierAmount = 0
-            end
-            lastammo = ammo
-        end
-    end
+---Event that is triggered for gunshots.
+---@param witnesses table  array of peds that witnessed the shots
+---@param ped number  the ped that shot the gun
+AddEventHandler("CEventGunShot", function(witnesses, ped)
+    -- The ped that shot the gun must be the player.
+    if PlayerPedId() ~= ped then return end
+    -- This event can be triggered multiple times for a single gunshot,
+    -- so ignore if the first ped in witnesses is not the player ped.
+    -- (it's always first in the array and shows up only on the first event for the gunshot)
+    if witnesses[1] ~= ped then return end
+    local weapon = GetSelectedPedWeapon(ped)
+    local ammo = GetAmmoInPedWeapon(ped, weapon)
+    TriggerServerEvent("weapons:server:UpdateWeaponAmmo", CurrentWeaponData, tonumber(ammo))
+    if MultiplierAmount <= 0 then return end
+    TriggerServerEvent("weapons:server:UpdateWeaponQuality", CurrentWeaponData, MultiplierAmount)
+    MultiplierAmount = 0
 end)
